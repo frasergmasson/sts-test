@@ -8,7 +8,21 @@ public class CompletedValidator implements Validator{
 
     final Pattern pattern;
 
-    private String convertBytesToString(byte[] message){
+    public CompletedValidator(){
+        String regEx = 
+            "02" // STX
+            + "(" // Data
+                + "10(02|03|10)" //0x10 followed by a byte that needs to be escaped
+                + "|((0[^23]|(1[^0])|[^01].))" //Any byte that does not need to be escaped (not 0x02,0x03,or0x10)
+            + ")*"// Zero or more bytes
+            + "03" // ETX
+            + ".."; // LRC
+
+        pattern = Pattern.compile(regEx);
+    }
+
+    //Converts message into a string of padded hexadecimal values
+    private String convertMessageToString(byte[] message){
         String[] stringBytes = new String[message.length];
         for(int i=0;i<message.length;i++){
             stringBytes[i] = String.format("%02X", message[i]);
@@ -32,24 +46,9 @@ public class CompletedValidator implements Validator{
         return calculatedLRC==message[message.length-1];
     } 
 
-
     @Override
     public boolean isValid(byte[] message){
-        return checkFormat(convertBytesToString(message))
+        return checkFormat(convertMessageToString(message))
             && checkLRC(message);
     }
-
-    public CompletedValidator(){
-        String regEx = 
-            "02" // STX
-            + "(" // Data
-                + "10(02|03|10)" //0x10 followed by a byte that needs to be escaped
-                + "|((0[^23]|(1[^0])|[^01].))" //Any byte that does not need to be escaped (not 0x02,0x03,or0x10)
-            + ")*"// Zero or more bytes
-            + "03" // ETX
-            + ".."; // LRC
-
-        pattern = Pattern.compile(regEx);
-    }
-
 }
