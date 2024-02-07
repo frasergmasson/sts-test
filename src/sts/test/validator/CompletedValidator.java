@@ -28,15 +28,15 @@ public class CompletedValidator implements Validator{
             if (message[i] != 0x10 || message[i-1] == 0x10){ // XOR is not performed if the value is a DLE
                 calculatedLRC ^= message[i];
             }
-        }  
+        }
         return calculatedLRC==message[message.length-1];
     } 
 
 
     @Override
     public boolean isValid(byte[] message){
-        return checkFormat(convertBytesToString(message)) 
-            && checkLRC(message); 
+        return checkFormat(convertBytesToString(message))
+            && checkLRC(message);
     }
 
     public CompletedValidator(){
